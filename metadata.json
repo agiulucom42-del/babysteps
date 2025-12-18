@@ -1,0 +1,8 @@
+{
+  "name": "BabySteps - Bebek Gelişim Takibi",
+  "description": "Yeni doğan bebekler için günlük, fotoğraf/video anı defteri, aşı takvimi ve gelişim takibi uygulaması.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
