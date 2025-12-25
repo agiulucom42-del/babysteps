@@ -5,12 +5,12 @@ import { BabyProfile, ChatMessage } from "../types";
 // Vite's way of handling environment variables
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-if (!apiKey) {
-  console.error("VITE_GEMINI_API_KEY is not set in .env file.");
+if (!apiKey || apiKey.trim() === '') {
+  console.error("VITE_GEMINI_API_KEY is not set or is empty in .env file.");
 }
 
-// Initialize the AI model only if the API key is available
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+// Initialize the AI model only if the API key is valid
+const ai = apiKey && apiKey.trim() !== '' ? new GoogleGenAI({ apiKey }) : null;
 
 export const askParentingAdvisor = async (history: ChatMessage[], profile: BabyProfile): Promise<string> => {
   if (!ai) {

@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [isLocked, setIsLocked] = useState(true); 
   const [hasPin, setHasPin] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null); // Error state for loading
 
   // Data State
   const [profile, setProfile] = useState<BabyProfile>(INITIAL_PROFILE);
@@ -38,21 +39,21 @@ const App: React.FC = () => {
   // 1. Initial Load Effect (Async)
   useEffect(() => {
     const initApp = async () => {
-      // Check First Launch
-      const firstLaunch = storageService.isFirstLaunch();
-      if (firstLaunch) {
-        setShowOnboarding(true);
-        setIsLocked(false); 
-      } else {
-        // Normal Flow: Check PIN
-        const pinExists = storageService.hasPin();
-        setHasPin(pinExists);
-        if (!pinExists) {
-          setIsLocked(false);
-        }
-      }
-
       try {
+        // Check First Launch
+        const firstLaunch = storageService.isFirstLaunch();
+        if (firstLaunch) {
+          setShowOnboarding(true);
+          setIsLocked(false);
+        } else {
+          // Normal Flow: Check PIN
+          const pinExists = storageService.hasPin();
+          setHasPin(pinExists);
+          if (!pinExists) {
+            setIsLocked(false);
+          }
+        }
+
         const savedData = await storageService.loadData();
         if (savedData && savedData.profile) {
           setProfile(savedData.profile);
@@ -66,6 +67,7 @@ const App: React.FC = () => {
         }
       } catch (error) {
         console.error("Failed to load initial data", error);
+        setLoadError("Uygulama verileri yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin veya daha sonra tekrar deneyin.");
       } finally {
         setIsLoaded(true);
       }
@@ -76,7 +78,7 @@ const App: React.FC = () => {
 
   // 2. Auto-Save Effect
   useEffect(() => {
-    if (isLoaded && !isLocked && !showOnboarding) { 
+    if (isLoaded && !isLocked && !showOnboarding && !loadError) { // Do not save if there was a load error
       const dataToSave: AppData = {
         profile,
         entries,
@@ -94,7 +96,7 @@ const App: React.FC = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [profile, entries, growthRecords, vaccines, milestones, customEvents, medicalHistory, documents, isLoaded, isLocked, showOnboarding]);
+  }, [profile, entries, growthRecords, vaccines, milestones, customEvents, medicalHistory, documents, isLoaded, isLocked, showOnboarding, loadError]);
 
   // Security Handlers
   const handlePinSuccess = (pin: string) => {
@@ -190,6 +192,18 @@ const App: React.FC = () => {
     return (
       <div className={`min-h-screen bg-${themeColor}-50 flex items-center justify-center text-${themeColor}-400 font-bold animate-pulse`}>
         Yükleniyor...
+      </div>
+    );
+  }
+
+  // Priority 0: Critical Load Error
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
+        <div className="text-center p-8 bg-white border border-red-200 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-red-700">Kritik Hata</h2>
+          <p className="text-red-600 mt-2">{loadError}</p>
+        </div>
       </div>
     );
   }

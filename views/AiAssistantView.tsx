@@ -11,7 +11,7 @@ interface AiAssistantViewProps extends ThemeProps {
 const AiAssistantView: React.FC<AiAssistantViewProps> = ({ profile, themeColor }) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-  if (!apiKey) {
+  if (!apiKey || apiKey.trim() === '') {
     return (
       <div className="text-center p-8 bg-red-50 border border-red-200 rounded-lg">
         <h3 className="font-bold text-red-700">Yapılandırma Hatası</h3>
