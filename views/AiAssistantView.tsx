@@ -9,6 +9,19 @@ interface AiAssistantViewProps extends ThemeProps {
 }
 
 const AiAssistantView: React.FC<AiAssistantViewProps> = ({ profile, themeColor }) => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+  if (!apiKey) {
+    return (
+      <div className="text-center p-8 bg-red-50 border border-red-200 rounded-lg">
+        <h3 className="font-bold text-red-700">Yapılandırma Hatası</h3>
+        <p className="text-sm text-red-600 mt-2">
+          Akıllı Asistan özelliği için API anahtarı ayarlanmamış. Lütfen yönetici ile iletişime geçin.
+        </p>
+      </div>
+    );
+  }
+
   const getInitialGreeting = (): ChatMessage => ({ 
       id: 'init', 
       role: 'model', 

@@ -2,13 +2,21 @@
 import { GoogleGenAI, Content } from "@google/genai";
 import { BabyProfile, ChatMessage } from "../types";
 
-const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+// Vite's way of handling environment variables
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
 if (!apiKey) {
-  console.error("GEMINI_API_KEY is not set.");
+  console.error("VITE_GEMINI_API_KEY is not set in .env file.");
 }
-const ai = new GoogleGenAI({ apiKey: apiKey });
+
+// Initialize the AI model only if the API key is available
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const askParentingAdvisor = async (history: ChatMessage[], profile: BabyProfile): Promise<string> => {
+  if (!ai) {
+    return "API anahtarı yapılandırılmadığı için Akıllı Asistan şu anda kullanılamıyor.";
+  }
+
   try {
     // Yaş hesaplama
     const birthDate = new Date(profile.birthDate);
