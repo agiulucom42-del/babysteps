@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Lock, Unlock, Delete, AlertCircle } from 'lucide-react';
 
 interface PinLockProps {
@@ -15,23 +15,27 @@ const PinLock: React.FC<PinLockProps> = ({ mode, onSuccess, onReset, themeColor 
   const [error, setError] = useState('');
   const [step, setStep] = useState<'enter' | 'confirm'>('enter'); // For setup flow
 
-  const handleNumClick = (num: number) => {
+  // --- OPTIMIZATION: Memoize handlers to prevent re-creation on each render ---
+  // This improves performance by avoiding unnecessary function allocations,
+  // which can be costly in components with frequent state updates.
+
+  const handleNumClick = useCallback((num: number) => {
     setError('');
     if (step === 'enter') {
       if (pin.length < 4) setPin(prev => prev + num);
     } else {
       if (confirmPin.length < 4) setConfirmPin(prev => prev + num);
     }
-  };
+  }, [step, pin.length, confirmPin.length]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     setError('');
     if (step === 'enter') {
       setPin(prev => prev.slice(0, -1));
     } else {
       setConfirmPin(prev => prev.slice(0, -1));
     }
-  };
+  }, [step]);
 
   useEffect(() => {
     // Check Logic when 4 digits entered
