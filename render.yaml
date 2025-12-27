@@ -1,0 +1,11 @@
+services:
+  - type: static_site
+    name: babysteps-bebek-gelisim-takibi
+    env: static
+    buildCommand: "npm install && npm run build"
+    publishDirectory: "dist"
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: "/*"
+        name: "Cache-Control"
+        value: "no-cache"
