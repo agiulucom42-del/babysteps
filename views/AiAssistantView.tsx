@@ -67,7 +67,9 @@ const AiAssistantView: React.FC<AiAssistantViewProps> = ({ profile, themeColor }
   };
 
   const handleClearChat = () => {
-    setMessages([getInitialGreeting()]);
+    if (window.confirm("Sohbet geçmişini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) {
+      setMessages([getInitialGreeting()]);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
