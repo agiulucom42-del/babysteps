@@ -2,13 +2,29 @@
 import { GoogleGenAI, Content } from "@google/genai";
 import { BabyProfile, ChatMessage } from "../types";
 
-const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
-if (!apiKey) {
-  console.error("GEMINI_API_KEY is not set.");
+// Performance: Lazily initialize the AI client to prevent server crashes
+// on startup if the API key is missing or invalid. This also avoids
+// loading the SDK until it's actually needed.
+let ai: GoogleGenAI | null = null;
+
+const getAiClient = () => {
+  if (!ai) {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    if (!apiKey) {
+      console.error("GEMINI_API_KEY is not set. AI features will not be available.");
+      return null;
+    }
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
 }
-const ai = new GoogleGenAI({ apiKey: apiKey });
 
 export const askParentingAdvisor = async (history: ChatMessage[], profile: BabyProfile): Promise<string> => {
+  const aiClient = getAiClient();
+  if (!aiClient) {
+    return "AI Asistanı için API anahtarı yapılandırılmamış. Lütfen .env.local dosyasını kontrol edin.";
+  }
+
   try {
     // Yaş hesaplama
     const birthDate = new Date(profile.birthDate);
@@ -59,7 +75,7 @@ export const askParentingAdvisor = async (history: ChatMessage[], profile: BabyP
       parts: [{ text: msg.content }]
     }));
 
-    const response = await ai.models.generateContent({
+    const response = await aiClient.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: contents,
       config: {
