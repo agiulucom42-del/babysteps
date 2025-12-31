@@ -270,7 +270,12 @@ const App: React.FC = () => {
         <header className={`p-4 pt-8 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-${themeColor}-50 flex items-center justify-between px-6`}>
           <div className="w-6"></div> 
           <h1 className={`text-center font-bold text-${themeColor}-500 tracking-wider text-sm uppercase bg-${themeColor}-50 px-4 py-1 rounded-full`}>BabySteps</h1>
-          <button onClick={() => setIsLocked(true)} className={`text-${themeColor}-300 hover:text-${themeColor}-500 transition-colors`}>
+          <button
+            onClick={() => setIsLocked(true)}
+            className={`text-${themeColor}-300 hover:text-${themeColor}-500 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-${themeColor}-400 rounded-md`}
+            aria-label="Uygulamayı Kilitle"
+            title="Uygulamayı Kilitle"
+          >
              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
           </button>
         </header>
