@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navigation from './components/Navigation';
 import DashboardView from './views/DashboardView';
 import DiaryView from './views/DiaryView';
@@ -181,9 +181,11 @@ const App: React.FC = () => {
   };
 
   // Computed Values
-  const latestGrowth = growthRecords.length > 0 
+  // ⚡ Bolt: Memoize latestGrowth to prevent expensive sorting on every render.
+  // This calculation only runs when growthRecords changes, not on other state updates.
+  const latestGrowth = useMemo(() => growthRecords.length > 0
     ? [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
-    : undefined;
+    : undefined, [growthRecords]);
 
   // --- Render Logic ---
   if (!isLoaded) {
