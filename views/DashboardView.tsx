@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BabyProfile, GrowthRecord, DiaryEntry, Vaccine, CalendarEvent, ThemeProps, ThemeColor } from '../types';
 import { THEME_COLORS } from '../constants';
+import Spinner from '../components/Spinner';
 import { Calendar, TrendingUp, Syringe, Settings, X, Save, Bell, Gift, AlertTriangle, Camera, Baby, ShieldCheck, Lock, HardDrive, Cpu, CalendarClock, Palette, Check, Trash2, GraduationCap } from 'lucide-react';
 
 interface DashboardViewProps extends ThemeProps {
@@ -27,6 +28,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ profile, latestGrowth, va
   const [showSecurity, setShowSecurity] = useState(false);
   const [showGraduation, setShowGraduation] = useState(false);
   const [editForm, setEditForm] = useState<BabyProfile>(profile);
+  const [isSaving, setIsSaving] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -178,8 +180,12 @@ const DashboardView: React.FC<DashboardViewProps> = ({ profile, latestGrowth, va
     setNotifications(newNotifications);
   }, [profile, vaccines, customEvents]);
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    // Simulate a network request for better UX
+    await new Promise(resolve => setTimeout(resolve, 750));
     onUpdateProfile(editForm);
+    setIsSaving(false);
     setIsEditing(false);
   };
 
@@ -573,12 +579,23 @@ const DashboardView: React.FC<DashboardViewProps> = ({ profile, latestGrowth, va
                  )}
               </div>
 
-              <button 
+              <button
                 onClick={handleSaveProfile}
-                className={`w-full bg-white text-${themeColor}-500 font-bold py-2.5 rounded-xl mt-4 flex items-center justify-center gap-2 shadow-lg`}
+                disabled={isSaving}
+                className={`w-full bg-white text-${themeColor}-500 font-bold py-2.5 rounded-xl mt-4 flex items-center justify-center gap-2 shadow-lg transition-opacity ${isSaving ? 'opacity-75 cursor-not-allowed' : 'hover:bg-slate-50'}`}
+                aria-label={isSaving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
               >
-                <Save size={16} />
-                Kaydet
+                {isSaving ? (
+                  <>
+                    <Spinner size={16} />
+                    <span>Kaydediliyor...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    <span>Kaydet</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
