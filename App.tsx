@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navigation from './components/Navigation';
 import DashboardView from './views/DashboardView';
 import DiaryView from './views/DiaryView';
@@ -180,10 +180,15 @@ const App: React.FC = () => {
     setDocuments(documents.filter(d => d.id !== id));
   };
 
-  // Computed Values
-  const latestGrowth = growthRecords.length > 0 
-    ? [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
-    : undefined;
+  // --- Computed Values ---
+  // ⚡ Bolt: Memoize the latestGrowth calculation.
+  // This sort operation is expensive and should only run when growthRecords changes,
+  // not on every re-render of the App component.
+  const latestGrowth = useMemo(() => {
+    return growthRecords.length > 0
+      ? [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+      : undefined;
+  }, [growthRecords]);
 
   // --- Render Logic ---
   if (!isLoaded) {
