@@ -665,4 +665,10 @@ const DashboardView: React.FC<DashboardViewProps> = ({ profile, latestGrowth, va
   );
 };
 
-export default DashboardView;
+// Bolt ⚡: Memoizing DashboardView.
+// Why: This component is complex and receives many props from the root App component.
+// `React.memo` prevents it from re-rendering if its props haven't changed, avoiding
+// costly re-calculations of age, notifications, etc. This is a huge win because many
+// state changes in App.tsx (like navigating views) don't affect DashboardView's props.
+// Impact: Significantly reduces re-renders of the main dashboard, making the app feel snappier.
+export default React.memo(DashboardView);
