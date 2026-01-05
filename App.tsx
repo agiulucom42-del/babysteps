@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navigation from './components/Navigation';
 import DashboardView from './views/DashboardView';
 import DiaryView from './views/DiaryView';
@@ -181,9 +181,13 @@ const App: React.FC = () => {
   };
 
   // Computed Values
-  const latestGrowth = growthRecords.length > 0 
-    ? [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
-    : undefined;
+  const latestGrowth = useMemo(() => {
+    if (growthRecords.length === 0) return undefined;
+    // By memoizing this value, we avoid re-sorting the entire growth records
+    // array on every single render. This is a significant performance win,
+    // especially as the number of records grows.
+    return [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  }, [growthRecords]);
 
   // --- Render Logic ---
   if (!isLoaded) {
