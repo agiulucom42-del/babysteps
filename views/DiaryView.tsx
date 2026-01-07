@@ -869,6 +869,8 @@ const DiaryView: React.FC<DiaryViewProps> = ({ entries, onAddEntry, onDeleteEntr
                              key={c.val}
                              onClick={() => setStoolColor(c.val)}
                              className={`w-8 h-8 rounded-full flex-shrink-0 ${c.bg} ${stoolColor === c.val ? 'ring-2 ring-cyan-400 scale-110' : ''}`}
+                             aria-label={`Renk: ${COLOR_MAP[c.val]}`}
+                             title={COLOR_MAP[c.val]}
                            />
                         ))}
                       </div>
