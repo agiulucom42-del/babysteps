@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navigation from './components/Navigation';
 import DashboardView from './views/DashboardView';
 import DiaryView from './views/DiaryView';
@@ -181,9 +181,17 @@ const App: React.FC = () => {
   };
 
   // Computed Values
-  const latestGrowth = growthRecords.length > 0 
-    ? [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
-    : undefined;
+  const latestGrowth = useMemo(() => {
+    if (growthRecords.length === 0) return undefined;
+
+    // Create a new array for sorting to avoid mutation
+    const sortedRecords = [...growthRecords];
+
+    // Sort records to find the most recent one
+    sortedRecords.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return sortedRecords[0];
+  }, [growthRecords]);
 
   // --- Render Logic ---
   if (!isLoaded) {
