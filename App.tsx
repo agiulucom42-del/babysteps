@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Navigation from './components/Navigation';
 import DashboardView from './views/DashboardView';
 import DiaryView from './views/DiaryView';
@@ -124,7 +124,16 @@ const App: React.FC = () => {
   };
 
   // --- Handlers ---
-  const handleUpdateProfile = (updatedProfile: BabyProfile) => setProfile(updatedProfile);
+  // ⚡ Bolt: Wrapping handler in useCallback to stabilize the prop for React.memo.
+  // This prevents the function from being recreated on every render of App.tsx,
+  // which is necessary for the React.memo optimization on DashboardView to work.
+  const handleUpdateProfile = useCallback((updatedProfile: BabyProfile) => setProfile(updatedProfile), []);
+
+  // ⚡ Bolt: Wrapping view changer in useCallback to stabilize the prop for React.memo.
+  const handleChangeView = useCallback((view: ViewState) => {
+    setCurrentView(view);
+  }, []);
+
   const handleAddEntry = (entry: DiaryEntry) => setEntries([entry, ...entries]);
   const handleDeleteEntry = (id: string) => setEntries(entries.filter(e => e.id !== id));
   const handleAddGrowthRecord = (record: GrowthRecord) => setGrowthRecords([...growthRecords, record]);
@@ -181,9 +190,14 @@ const App: React.FC = () => {
   };
 
   // Computed Values
-  const latestGrowth = growthRecords.length > 0 
-    ? [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
-    : undefined;
+  // ⚡ Bolt: Memoizing latestGrowth to prevent expensive sorting on every render.
+  // This calculation was running on every state change in App.tsx.
+  // Now, it only re-runs if the `growthRecords` array itself changes.
+  const latestGrowth = useMemo(() => {
+    return growthRecords.length > 0
+      ? [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+      : undefined;
+  }, [growthRecords]);
 
   // --- Render Logic ---
   if (!isLoaded) {
@@ -221,7 +235,7 @@ const App: React.FC = () => {
             vaccines={vaccines}
             recentEntries={entries}
             customEvents={customEvents}
-            onChangeView={setCurrentView}
+            onChangeView={handleChangeView}
             onUpdateProfile={handleUpdateProfile}
             themeColor={themeColor}
           />
