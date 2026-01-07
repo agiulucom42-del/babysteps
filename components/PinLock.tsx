@@ -120,6 +120,7 @@ const PinLock: React.FC<PinLockProps> = ({ mode, onSuccess, onReset, themeColor 
         </button>
         <button
           onClick={handleDelete}
+          aria-label="Son rakamı sil"
           className="w-16 h-16 rounded-full hover:bg-white/10 flex items-center justify-center transition-all active:scale-95 text-white/70 hover:text-white"
         >
           <Delete size={24} />
