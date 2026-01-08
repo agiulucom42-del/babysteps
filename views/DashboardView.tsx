@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { BabyProfile, GrowthRecord, DiaryEntry, Vaccine, CalendarEvent, ThemeProps, ThemeColor } from '../types';
 import { THEME_COLORS } from '../constants';
 import { Calendar, TrendingUp, Syringe, Settings, X, Save, Bell, Gift, AlertTriangle, Camera, Baby, ShieldCheck, Lock, HardDrive, Cpu, CalendarClock, Palette, Check, Trash2, GraduationCap } from 'lucide-react';
@@ -30,6 +30,12 @@ const DashboardView: React.FC<DashboardViewProps> = ({ profile, latestGrowth, va
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 🔥 Bolt: Memoize the sorted vaccines array to prevent re-sorting on every render.
+  // This is used for generating notifications and displaying the "next vaccine" card.
+  const sortedVaccines = useMemo(() => {
+    return [...vaccines].sort((a, b) => a.monthDue - b.monthDue);
+  }, [vaccines]);
 
   // Calculate age helpers
   const getAgeInMonths = (birthDateStr: string) => {
@@ -127,7 +133,6 @@ const DashboardView: React.FC<DashboardViewProps> = ({ profile, latestGrowth, va
     }
 
     // 3. Next Upcoming / Overdue Vaccine Check
-    const sortedVaccines = [...vaccines].sort((a, b) => a.monthDue - b.monthDue);
     const nextUncompleted = sortedVaccines.find(v => !v.completed);
 
     if (nextUncompleted) {
@@ -211,7 +216,6 @@ const DashboardView: React.FC<DashboardViewProps> = ({ profile, latestGrowth, va
   };
 
   // Determine next vaccine for status card (Sorted)
-  const sortedVaccines = [...vaccines].sort((a, b) => a.monthDue - b.monthDue);
   const nextVaccine = sortedVaccines.find(v => !v.completed);
 
   return (
