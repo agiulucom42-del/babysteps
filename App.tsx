@@ -7,7 +7,8 @@ import HealthView from './views/HealthView';
 import GrowthView from './views/GrowthView';
 import AiAssistantView from './views/AiAssistantView';
 import PinLock from './components/PinLock';
-import Onboarding from './components/Onboarding'; 
+import Onboarding from './components/Onboarding';
+import ConfirmationModal from './components/ConfirmationModal';
 import { ViewState, DiaryEntry, GrowthRecord, Vaccine, BabyProfile, Milestone, CalendarEvent, MedicalHistoryItem, MedicalDocument } from './types';
 import { INITIAL_PROFILE, INITIAL_GROWTH, INITIAL_ENTRIES, INITIAL_VACCINES, INITIAL_MILESTONES, INITIAL_EVENTS, INITIAL_MEDICAL_HISTORY, INITIAL_DOCUMENTS } from './constants';
 import { storageService, AppData } from './services/storageService';
@@ -18,9 +19,10 @@ const App: React.FC = () => {
   
   // Security & Loading State
   const [showOnboarding, setShowOnboarding] = useState(false); 
-  const [isLocked, setIsLocked] = useState(true); 
+  const [isLocked, setIsLocked] = useState(true);
   const [hasPin, setHasPin] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   // Data State
   const [profile, setProfile] = useState<BabyProfile>(INITIAL_PROFILE);
@@ -109,11 +111,17 @@ const App: React.FC = () => {
     }
   };
   
-  const handleResetApp = async () => {
-      if(window.confirm("Dikkat! Tüm veriler silinecek ve uygulama sıfırlanacak. Onaylıyor musunuz?")) {
-          await storageService.clearData();
-          window.location.reload();
-      }
+  const handleRequestReset = () => {
+    setIsResetModalOpen(true);
+  };
+
+  const handleConfirmReset = async () => {
+    await storageService.clearData();
+    window.location.reload();
+  };
+
+  const handleCancelReset = () => {
+    setIsResetModalOpen(false);
   };
 
   const handleOnboardingComplete = () => {
@@ -200,14 +208,26 @@ const App: React.FC = () => {
   }
 
   // Priority 2: PIN Lock
-  if (isLocked || (!hasPin && !showOnboarding)) { 
+  if (isLocked || (!hasPin && !showOnboarding)) {
     return (
-      <PinLock 
-        mode={hasPin ? 'unlock' : 'setup'} 
-        onSuccess={handlePinSuccess}
-        onReset={hasPin ? handleResetApp : undefined}
-        themeColor={themeColor}
-      />
+      <>
+        <PinLock
+          mode={hasPin ? 'unlock' : 'setup'}
+          onSuccess={handlePinSuccess}
+          onReset={hasPin ? handleRequestReset : undefined}
+          themeColor={themeColor}
+        />
+        <ConfirmationModal
+          isOpen={isResetModalOpen}
+          onClose={handleCancelReset}
+          onConfirm={handleConfirmReset}
+          title="Uygulamayı Sıfırla"
+          message="Tüm verileriniz kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam etmek istediğinizden emin misiniz?"
+          themeColor="red"
+          confirmLabel="Onayla ve Sil"
+          cancelLabel="İptal"
+        />
+      </>
     );
   }
 
