@@ -9,11 +9,26 @@ interface PinLockProps {
   themeColor?: string; // Optional since it might be called before theme is set
 }
 
+// Add a small style block for the shake animation. This is a simple way
+// to keep the component self-contained without needing to modify global CSS.
+const shakeAnimation = `
+  @keyframes shake {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(2px); }
+    30%, 50%, 70% { transform: translateX(-4px); }
+    40%, 60% { transform: translateX(4px); }
+  }
+  .shake {
+    animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  }
+`;
+
 const PinLock: React.FC<PinLockProps> = ({ mode, onSuccess, onReset, themeColor = 'rose' }) => {
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState(''); // For setup mode
   const [error, setError] = useState('');
   const [step, setStep] = useState<'enter' | 'confirm'>('enter'); // For setup flow
+  const [isShaking, setIsShaking] = useState(false);
 
   const handleNumClick = (num: number) => {
     setError('');
@@ -41,8 +56,9 @@ const PinLock: React.FC<PinLockProps> = ({ mode, onSuccess, onReset, themeColor 
         // If success handler doesn't unmount us (wrong pin), we reset
         setTimeout(() => {
             if (pin.length === 4) { // Still here?
-                setPin('');
                 setError('Hatalı PIN');
+                setIsShaking(true);
+                setPin('');
             }
         }, 300);
       }
@@ -54,6 +70,7 @@ const PinLock: React.FC<PinLockProps> = ({ mode, onSuccess, onReset, themeColor 
           onSuccess(pin);
         } else {
           setError('PINler eşleşmiyor. Tekrar dene.');
+          setIsShaking(true);
           setPin('');
           setConfirmPin('');
           setStep('enter');
@@ -64,13 +81,14 @@ const PinLock: React.FC<PinLockProps> = ({ mode, onSuccess, onReset, themeColor 
 
   return (
     <div className={`fixed inset-0 z-[60] bg-${themeColor}-500 flex flex-col items-center justify-center text-white p-6 animate-fade-in`}>
+      <style>{shakeAnimation}</style>
       <div className="mb-8 flex flex-col items-center">
         <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
           {mode === 'unlock' ? <Lock size={32} /> : <Unlock size={32} />}
         </div>
         <h2 className="text-2xl font-bold">
           {mode === 'setup' 
-            ? (step === 'enter' ? 'Yeni PIN Belirle' : 'PIN\'i Doğrula') 
+            ? (step === 'enter' ? 'Yeni PIN Belirle' : "PIN'i Doğrula")
             : 'Hoşgeldiniz'}
         </h2>
         <p className={`text-${themeColor}-100 text-sm mt-2`}>
@@ -81,7 +99,10 @@ const PinLock: React.FC<PinLockProps> = ({ mode, onSuccess, onReset, themeColor 
       </div>
 
       {/* PIN Dots */}
-      <div className="flex gap-4 mb-8">
+      <div
+        className={`flex gap-4 mb-8 ${isShaking ? 'shake' : ''}`}
+        onAnimationEnd={() => setIsShaking(false)}
+      >
         {[0, 1, 2, 3].map(i => (
           <div 
             key={i} 
