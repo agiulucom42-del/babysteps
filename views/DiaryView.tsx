@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { DiaryEntry, ThemeProps } from '../types';
 import { Plus, Image as ImageIcon, Video, X, Milk, Moon, Baby, Droplets, Utensils, Clock, Play, Pause, Music, StopCircle, CircleDot, Share2, Smile } from 'lucide-react';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 interface DiaryViewProps extends ThemeProps {
   entries: DiaryEntry[];
@@ -66,6 +67,8 @@ const DiaryView: React.FC<DiaryViewProps> = ({ entries, onAddEntry, onDeleteEntr
   // Memories State
   const [isAdding, setIsAdding] = useState(false);
   const [newNote, setNewNote] = useState('');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
   
   // Media State (Image or Video)
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
@@ -461,6 +464,14 @@ const DiaryView: React.FC<DiaryViewProps> = ({ entries, onAddEntry, onDeleteEntr
   const routineEntries = entries.filter(e => e.category && e.category !== 'memory');
   const memoryEntries = entries.filter(e => !e.category || e.category === 'memory');
 
+  const handleDeleteConfirm = () => {
+    if (entryToDelete) {
+      onDeleteEntry(entryToDelete);
+    }
+    setEntryToDelete(null);
+    setIsDeleteModalOpen(false);
+  };
+
   return (
     <div className="pb-24 space-y-6">
       
@@ -585,7 +596,10 @@ const DiaryView: React.FC<DiaryViewProps> = ({ entries, onAddEntry, onDeleteEntr
                            <Share2 size={14} />
                          </button>
                          <button 
-                           onClick={() => onDeleteEntry(entry.id)} 
+                           onClick={() => {
+                             setEntryToDelete(entry.id);
+                             setIsDeleteModalOpen(true);
+                           }}
                            className="text-slate-300 hover:text-red-400 transition-colors p-1"
                          >
                            <X size={14} />
@@ -1029,7 +1043,13 @@ const DiaryView: React.FC<DiaryViewProps> = ({ entries, onAddEntry, onDeleteEntr
                             </div>
                          </div>
                       </div>
-                      <button onClick={() => onDeleteEntry(entry.id)} className="text-slate-300 hover:text-red-400 p-2">
+                      <button
+                        onClick={() => {
+                          setEntryToDelete(entry.id);
+                          setIsDeleteModalOpen(true);
+                        }}
+                        className="text-slate-300 hover:text-red-400 p-2"
+                      >
                         <X size={14} />
                       </button>
                    </div>
@@ -1039,6 +1059,15 @@ const DiaryView: React.FC<DiaryViewProps> = ({ entries, onAddEntry, onDeleteEntr
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Anıyı Sil"
+        message="Bu anıyı kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+        themeColor={themeColor}
+      />
     </div>
   );
 };
