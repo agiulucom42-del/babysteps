@@ -8,6 +8,7 @@ import GrowthView from './views/GrowthView';
 import AiAssistantView from './views/AiAssistantView';
 import PinLock from './components/PinLock';
 import Onboarding from './components/Onboarding'; 
+import ConfirmModal from './components/ConfirmModal';
 import { ViewState, DiaryEntry, GrowthRecord, Vaccine, BabyProfile, Milestone, CalendarEvent, MedicalHistoryItem, MedicalDocument } from './types';
 import { INITIAL_PROFILE, INITIAL_GROWTH, INITIAL_ENTRIES, INITIAL_VACCINES, INITIAL_MILESTONES, INITIAL_EVENTS, INITIAL_MEDICAL_HISTORY, INITIAL_DOCUMENTS } from './constants';
 import { storageService, AppData } from './services/storageService';
@@ -21,6 +22,7 @@ const App: React.FC = () => {
   const [isLocked, setIsLocked] = useState(true); 
   const [hasPin, setHasPin] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   // Data State
   const [profile, setProfile] = useState<BabyProfile>(INITIAL_PROFILE);
@@ -109,11 +111,8 @@ const App: React.FC = () => {
     }
   };
   
-  const handleResetApp = async () => {
-      if(window.confirm("Dikkat! Tüm veriler silinecek ve uygulama sıfırlanacak. Onaylıyor musunuz?")) {
-          await storageService.clearData();
-          window.location.reload();
-      }
+  const handleResetApp = () => {
+    setIsResetModalOpen(true);
   };
 
   const handleOnboardingComplete = () => {
@@ -285,6 +284,18 @@ const App: React.FC = () => {
         </main>
 
         <Navigation currentView={currentView} setView={setCurrentView} themeColor={themeColor} />
+
+        <ConfirmModal
+          isOpen={isResetModalOpen}
+          title="Verileri Sıfırla"
+          message="Dikkat! Tüm veriler kalıcı olarak silinecek ve uygulama sıfırlanacak. Bu işlem geri alınamaz. Onaylıyor musunuz?"
+          onConfirm={async () => {
+            await storageService.clearData();
+            window.location.reload();
+          }}
+          onCancel={() => setIsResetModalOpen(false)}
+          themeColor={themeColor}
+        />
       </div>
     </div>
   );
