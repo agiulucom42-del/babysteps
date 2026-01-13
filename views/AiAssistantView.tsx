@@ -67,7 +67,9 @@ const AiAssistantView: React.FC<AiAssistantViewProps> = ({ profile, themeColor }
   };
 
   const handleClearChat = () => {
-    setMessages([getInitialGreeting()]);
+    if (window.confirm("Are you sure you want to clear the chat history?")) {
+      setMessages([getInitialGreeting()]);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
