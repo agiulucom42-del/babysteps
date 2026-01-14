@@ -1,0 +1,3 @@
+## 2024-07-25 - Dynamic Tailwind Classes Fail in JIT Compilation
+**Learning:** Using string interpolation to dynamically create Tailwind CSS class names (e.g., `bg-${themeColor}-500`) is a critical bug. The Just-In-Time (JIT) compiler scans for full, unbroken class strings at build time and will not detect these dynamically generated classes. This results in missing styles in the production build, breaking the UI.
+**Action:** Always use a static mapping object to associate dynamic values (like themes or states) with the complete, static Tailwind class strings. This ensures the JIT compiler can discover and include all necessary CSS.
