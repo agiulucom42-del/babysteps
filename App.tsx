@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navigation from './components/Navigation';
 import DashboardView from './views/DashboardView';
 import DiaryView from './views/DiaryView';
@@ -181,9 +181,16 @@ const App: React.FC = () => {
   };
 
   // Computed Values
-  const latestGrowth = growthRecords.length > 0 
-    ? [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
-    : undefined;
+  const latestGrowth = useMemo(() => {
+    // This is a potentially expensive calculation:
+    // 1. It creates a new copy of the growthRecords array `[...growthRecords]`
+    // 2. It sorts the entire array, which can be O(n log n)
+    // 3. This was running on *every single render* of the App component.
+    // By wrapping it in useMemo, we ensure this logic only re-runs if `growthRecords` changes.
+    if (growthRecords.length === 0) return undefined;
+
+    return [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  }, [growthRecords]);
 
   // --- Render Logic ---
   if (!isLoaded) {
