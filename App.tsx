@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navigation from './components/Navigation';
 import DashboardView from './views/DashboardView';
 import DiaryView from './views/DiaryView';
@@ -181,9 +181,15 @@ const App: React.FC = () => {
   };
 
   // Computed Values
-  const latestGrowth = growthRecords.length > 0 
-    ? [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
-    : undefined;
+  const latestGrowth = useMemo(() => {
+    if (growthRecords.length === 0) return undefined;
+    // Bolt ⚡: Memoizing this calculation.
+    // Why: Prevents re-sorting the entire growthRecords array on every single render.
+    // The sort only re-runs when growthRecords itself changes.
+    // Impact: Reduces re-render cost, especially as the number of growth records increases.
+    // Measurement: Can be verified with React DevTools profiler; non-memoized version will show this calculation in every App re-render flamegraph.
+    return [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  }, [growthRecords]);
 
   // --- Render Logic ---
   if (!isLoaded) {
