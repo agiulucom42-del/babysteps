@@ -121,7 +121,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <button
             ref={confirmButtonRef}
             type="button"
-            className={`inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${styles.bg} ${styles.hoverBg} ${styles.ring}`}
+            className={`inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${styles.bg} ${styles.hoverBg} ${styles.ring} ${themeColor === 'rose' ? 'animate-pulse' : ''}`}
             onClick={onConfirm}
           >
             {confirmText}
