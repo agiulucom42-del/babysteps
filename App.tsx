@@ -219,6 +219,8 @@ const App: React.FC = () => {
   }
 
   const renderView = () => {
+    // 🕵️‍♂️ Bolt's Performance Check: Logging view renders to find bottlenecks.
+    console.log(`⚡ [Bolt] Rendering view: ${currentView}`);
     switch (currentView) {
       case 'dashboard':
         return (

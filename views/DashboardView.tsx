@@ -23,6 +23,8 @@ interface Notification {
 }
 
 const DashboardView: React.FC<DashboardViewProps> = ({ profile, latestGrowth, vaccines, recentEntries, customEvents, onChangeView, onUpdateProfile, themeColor }) => {
+  // 🕵️‍♂️ Bolt's Performance Check: Logging DashboardView renders.
+  console.log('⚡ [Bolt] Rendering DashboardView');
   const [isEditing, setIsEditing] = useState(false);
   const [showSecurity, setShowSecurity] = useState(false);
   const [showGraduation, setShowGraduation] = useState(false);
