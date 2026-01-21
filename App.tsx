@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Navigation from './components/Navigation';
 import DashboardView from './views/DashboardView';
 import DiaryView from './views/DiaryView';
@@ -128,7 +128,9 @@ const App: React.FC = () => {
   };
 
   // --- Handlers ---
-  const handleUpdateProfile = (updatedProfile: BabyProfile) => setProfile(updatedProfile);
+  // ⚡ Performance Optimization: Memoize handlers to prevent re-renders in child components.
+  const handleUpdateProfile = useCallback((updatedProfile: BabyProfile) => setProfile(updatedProfile), []);
+  const handleSetCurrentView = useCallback((view: ViewState) => setCurrentView(view), []);
   const handleAddEntry = (entry: DiaryEntry) => setEntries([entry, ...entries]);
   const handleDeleteEntry = (id: string) => setEntries(entries.filter(e => e.id !== id));
   const handleAddGrowthRecord = (record: GrowthRecord) => setGrowthRecords([...growthRecords, record]);
@@ -228,7 +230,7 @@ const App: React.FC = () => {
             vaccines={vaccines}
             recentEntries={entries}
             customEvents={customEvents}
-            onChangeView={setCurrentView}
+            onChangeView={handleSetCurrentView}
             onUpdateProfile={handleUpdateProfile}
             themeColor={themeColor}
           />

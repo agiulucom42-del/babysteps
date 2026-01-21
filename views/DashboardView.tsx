@@ -21,8 +21,12 @@ interface Notification {
   message: string;
   date?: string;
 }
-
-const DashboardView: React.FC<DashboardViewProps> = ({ profile, latestGrowth, vaccines, recentEntries, customEvents, onChangeView, onUpdateProfile, themeColor }) => {
+// ⚡ Performance Optimization:
+// Wrapped DashboardView with React.memo to prevent unnecessary re-renders.
+// This is crucial as DashboardView is a large component with many children.
+// For this to be effective, props passed from the parent (App.tsx), especially
+// functions like `onChangeView` and `onUpdateProfile`, must be memoized with `useCallback`.
+const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, latestGrowth, vaccines, recentEntries, customEvents, onChangeView, onUpdateProfile, themeColor }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [showSecurity, setShowSecurity] = useState(false);
   const [showGraduation, setShowGraduation] = useState(false);
@@ -663,6 +667,6 @@ const DashboardView: React.FC<DashboardViewProps> = ({ profile, latestGrowth, va
       </div>
     </div>
   );
-};
+});
 
 export default DashboardView;
