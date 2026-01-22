@@ -131,13 +131,13 @@ const App: React.FC = () => {
   // ⚡ Performance Optimization: Memoize handlers to prevent re-renders in child components.
   const handleUpdateProfile = useCallback((updatedProfile: BabyProfile) => setProfile(updatedProfile), []);
   const handleSetCurrentView = useCallback((view: ViewState) => setCurrentView(view), []);
-  const handleAddEntry = (entry: DiaryEntry) => setEntries([entry, ...entries]);
-  const handleDeleteEntry = (id: string) => setEntries(entries.filter(e => e.id !== id));
-  const handleAddGrowthRecord = (record: GrowthRecord) => setGrowthRecords([...growthRecords, record]);
-  const handleAddMilestone = (milestone: Milestone) => setMilestones([...milestones, milestone]);
+  const handleAddEntry = useCallback((entry: DiaryEntry) => setEntries(prev => [entry, ...prev]), []);
+  const handleDeleteEntry = useCallback((id: string) => setEntries(prev => prev.filter(e => e.id !== id)), []);
+  const handleAddGrowthRecord = useCallback((record: GrowthRecord) => setGrowthRecords(prev => [...prev, record]), []);
+  const handleAddMilestone = useCallback((milestone: Milestone) => setMilestones(prev => [...prev, milestone]), []);
   
-  const handleToggleVaccine = (id: string) => {
-    setVaccines(vaccines.map(v => {
+  const handleToggleVaccine = useCallback((id: string) => {
+    setVaccines(prev => prev.map(v => {
       if (v.id === id) {
         return {
           ...v,
@@ -147,10 +147,10 @@ const App: React.FC = () => {
       }
       return v;
     }));
-  };
+  }, []);
 
-  const handleToggleMilestone = (id: string) => {
-    setMilestones(milestones.map(m => {
+  const handleToggleMilestone = useCallback((id: string) => {
+    setMilestones(prev => prev.map(m => {
       if (m.id === id) {
         return {
           ...m,
@@ -160,31 +160,31 @@ const App: React.FC = () => {
       }
       return m;
     }));
-  };
+  }, []);
 
-  const handleAddEvent = (event: CalendarEvent) => {
-    setCustomEvents([...customEvents, event]);
-  };
+  const handleAddEvent = useCallback((event: CalendarEvent) => {
+    setCustomEvents(prev => [...prev, event]);
+  }, []);
 
-  const handleDeleteEvent = (id: string) => {
-    setCustomEvents(customEvents.filter(e => e.id !== id));
-  };
+  const handleDeleteEvent = useCallback((id: string) => {
+    setCustomEvents(prev => prev.filter(e => e.id !== id));
+  }, []);
 
-  const handleAddHistory = (item: MedicalHistoryItem) => {
-    setMedicalHistory([...medicalHistory, item]);
-  };
+  const handleAddHistory = useCallback((item: MedicalHistoryItem) => {
+    setMedicalHistory(prev => [...prev, item]);
+  }, []);
 
-  const handleDeleteHistory = (id: string) => {
-    setMedicalHistory(medicalHistory.filter(i => i.id !== id));
-  };
+  const handleDeleteHistory = useCallback((id: string) => {
+    setMedicalHistory(prev => prev.filter(i => i.id !== id));
+  }, []);
 
-  const handleAddDocument = (doc: MedicalDocument) => {
-    setDocuments([...documents, doc]);
-  };
+  const handleAddDocument = useCallback((doc: MedicalDocument) => {
+    setDocuments(prev => [...prev, doc]);
+  }, []);
 
-  const handleDeleteDocument = (id: string) => {
-    setDocuments(documents.filter(d => d.id !== id));
-  };
+  const handleDeleteDocument = useCallback((id: string) => {
+    setDocuments(prev => prev.filter(d => d.id !== id));
+  }, []);
 
   // ⚡ Performance Optimization: Memoize latestGrowth to prevent re-sorting on every render.
   // This is crucial because App.tsx is a high-frequency re-rendering component.
