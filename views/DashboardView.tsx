@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { BabyProfile, GrowthRecord, DiaryEntry, Vaccine, CalendarEvent, ThemeProps, ThemeColor } from '../types';
 import { THEME_COLORS } from '../constants';
 import { Calendar, TrendingUp, Syringe, Settings, X, Save, Bell, Gift, AlertTriangle, Camera, Baby, ShieldCheck, Lock, HardDrive, Cpu, CalendarClock, Palette, Check, Trash2, GraduationCap } from 'lucide-react';
@@ -102,85 +102,87 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
     setShowGraduation(false);
   };
 
-  // Generate Notifications
-  useEffect(() => {
+  // ⚡ Performance Optimization: Memoize sorted vaccines array once to prevent re-sorting.
+  const sortedVaccines = useMemo(() => {
+    return [...vaccines].sort((a, b) => a.monthDue - b.monthDue);
+  }, [vaccines]);
+
+  // ⚡ Performance Optimization: Memoize notifications to avoid re-calculating on every render.
+  const generatedNotifications = useMemo(() => {
     const newNotifications: Notification[] = [];
     const ageInMonths = getAgeInMonths(profile.birthDate);
     const today = new Date();
     const birthDate = new Date(profile.birthDate);
 
-    // 1. Birthday / Month-versary Check
+    // 1. Birthday Check
     if (today.getDate() === birthDate.getDate()) {
       newNotifications.push({
         id: 'birthday',
         type: 'birthday',
         title: ageInMonths % 12 === 0 ? "Mutlu Yıllar!" : `${ageInMonths}. Ay Dönümü!`,
-        message: `${profile.name} bugün tam ${ageInMonths} aylık oldu! Gelişimini kaydetmeyi unutma.`
+        message: `${profile.name} bugün tam ${ageInMonths} aylık oldu!`
       });
     }
 
-    // 2. Vaccine Check (Due this month and not completed)
+    // 2. Due Vaccine Check
     const dueVaccines = vaccines.filter(v => v.monthDue === ageInMonths && !v.completed);
     if (dueVaccines.length > 0) {
       newNotifications.push({
         id: 'vaccine',
         type: 'vaccine',
         title: 'Aşı Zamanı',
-        message: `Bu ay ${dueVaccines.length} aşı görünmektedir: ${dueVaccines.map(v => v.name).join(', ')}.`
+        message: `Bu ay: ${dueVaccines.map(v => v.name).join(', ')}.`
       });
     }
 
-    // 3. Next Upcoming / Overdue Vaccine Check
-    const sortedVaccines = [...vaccines].sort((a, b) => a.monthDue - b.monthDue);
+    // 3. Upcoming/Overdue Vaccine Check (using pre-sorted array)
     const nextUncompleted = sortedVaccines.find(v => !v.completed);
-
     if (nextUncompleted) {
-      // Don't duplicate if it's already in "dueVaccines" (due this month)
       const isDueThisMonth = nextUncompleted.monthDue === ageInMonths;
-      
-      const dueDate = new Date(birthDate);
-      dueDate.setMonth(birthDate.getMonth() + nextUncompleted.monthDue);
-
       if (!isDueThisMonth) {
+        const dueDate = new Date(birthDate);
+        dueDate.setMonth(birthDate.getMonth() + nextUncompleted.monthDue);
         if (nextUncompleted.monthDue > ageInMonths) {
-            newNotifications.push({
-                id: 'upcoming-vaccine',
-                type: 'vaccine',
-                title: 'Sıradaki Aşı',
-                message: `${nextUncompleted.name}\nBeklenen Tarih: ${dueDate.toLocaleDateString('tr-TR')}`
-            });
+          newNotifications.push({
+            id: 'upcoming-vaccine',
+            type: 'vaccine',
+            title: 'Sıradaki Aşı',
+            message: `${nextUncompleted.name}\nBeklenen Tarih: ${dueDate.toLocaleDateString('tr-TR')}`
+          });
         } else {
-            // Overdue
-            newNotifications.push({
-                id: 'overdue-vaccine',
-                type: 'vaccine',
-                title: 'Eksik Aşı Uyarısı',
-                message: `${nextUncompleted.name} (${nextUncompleted.monthDue}. Ay) henüz tamamlanmadı.`
-            });
+          newNotifications.push({
+            id: 'overdue-vaccine',
+            type: 'vaccine',
+            title: 'Eksik Aşı Uyarısı',
+            message: `${nextUncompleted.name} (${nextUncompleted.monthDue}. Ay) tamamlanmadı.`
+          });
         }
       }
     }
 
-    // 4. Custom Events Check (Approaching in next 3 days)
+    // 4. Custom Events Check
     const now = new Date();
     customEvents.forEach(event => {
-       const eventDate = new Date(event.date);
-       const diffTime = eventDate.getTime() - now.getTime();
-       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-       if (diffDays >= 0 && diffDays <= 3) {
-          const dayText = diffDays === 0 ? "Bugün" : diffDays === 1 ? "Yarın" : `${diffDays} gün sonra`;
-          newNotifications.push({
-             id: `event-${event.id}`,
-             type: 'event',
-             title: 'Yaklaşan Etkinlik',
-             message: `${event.title} - ${dayText}`
-          });
-       }
+      const eventDate = new Date(event.date);
+      const diffTime = eventDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays >= 0 && diffDays <= 3) {
+        const dayText = diffDays === 0 ? "Bugün" : diffDays === 1 ? "Yarın" : `${diffDays} gün sonra`;
+        newNotifications.push({
+          id: `event-${event.id}`,
+          type: 'event',
+          title: 'Yaklaşan Etkinlik',
+          message: `${event.title} - ${dayText}`
+        });
+      }
     });
 
-    setNotifications(newNotifications);
-  }, [profile, vaccines, customEvents]);
+    return newNotifications;
+  }, [profile, vaccines, customEvents, sortedVaccines]); // Added sortedVaccines dependency
+
+  useEffect(() => {
+    setNotifications(generatedNotifications);
+  }, [generatedNotifications]);
 
   const handleSaveProfile = () => {
     onUpdateProfile(editForm);
@@ -214,9 +216,7 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Determine next vaccine for status card (Sorted)
-  const sortedVaccines = [...vaccines].sort((a, b) => a.monthDue - b.monthDue);
-  const nextVaccine = sortedVaccines.find(v => !v.completed);
+  const nextVaccine = useMemo(() => sortedVaccines.find(v => !v.completed), [sortedVaccines]);
 
   return (
     <div className="space-y-6 pb-24 animate-fade-in relative">
