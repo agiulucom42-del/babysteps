@@ -92,6 +92,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
+      aria-describedby="modal-description"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
@@ -107,7 +108,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <h3 id="modal-title" className="text-lg font-bold text-slate-800">
             {title}
           </h3>
-          <p className="mt-2 text-sm text-slate-500">{message}</p>
+          <p id="modal-description" className="mt-2 text-sm text-slate-500">{message}</p>
         </div>
         <div className="bg-slate-50 grid grid-cols-2 gap-3 px-6 py-4 rounded-b-2xl">
           <button
