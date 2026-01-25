@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { BabyProfile, GrowthRecord, DiaryEntry, Vaccine, CalendarEvent, ThemeProps, ThemeColor } from '../types';
 import { THEME_COLORS } from '../constants';
 import { Calendar, TrendingUp, Syringe, Settings, X, Save, Bell, Gift, AlertTriangle, Camera, Baby, ShieldCheck, Lock, HardDrive, Cpu, CalendarClock, Palette, Check, Trash2, GraduationCap } from 'lucide-react';
@@ -214,9 +214,13 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Determine next vaccine for status card (Sorted)
-  const sortedVaccines = [...vaccines].sort((a, b) => a.monthDue - b.monthDue);
-  const nextVaccine = sortedVaccines.find(v => !v.completed);
+  // ⚡ Performance Optimization:
+  // Memoize the next vaccine calculation to prevent re-sorting on every render.
+  // This is a small but important optimization, as DashboardView can re-render frequently.
+  const nextVaccine = useMemo(() => {
+    const sortedVaccines = [...vaccines].sort((a, b) => a.monthDue - b.monthDue);
+    return sortedVaccines.find(v => !v.completed);
+  }, [vaccines]);
 
   return (
     <div className="space-y-6 pb-24 animate-fade-in relative">
