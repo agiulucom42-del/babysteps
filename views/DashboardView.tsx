@@ -3,8 +3,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BabyProfile, GrowthRecord, DiaryEntry, Vaccine, CalendarEvent, ThemeProps, ThemeColor } from '../types';
 import { THEME_COLORS } from '../constants';
 import { Calendar, TrendingUp, Syringe, Settings, X, Save, Bell, Gift, AlertTriangle, Camera, Baby, ShieldCheck, Lock, HardDrive, Cpu, CalendarClock, Palette, Check, Trash2, GraduationCap } from 'lucide-react';
-import DataManagement from '../components/DataManagement';
-import { AppData } from '../services/storageService';
 
 interface DashboardViewProps extends ThemeProps {
   profile: BabyProfile;
@@ -14,8 +12,6 @@ interface DashboardViewProps extends ThemeProps {
   customEvents: CalendarEvent[];
   onChangeView: (view: any) => void;
   onUpdateProfile: (profile: BabyProfile) => void;
-  appData: AppData;
-  onRestoreData: (data: AppData) => void;
 }
 
 interface Notification {
@@ -30,7 +26,7 @@ interface Notification {
 // This is crucial as DashboardView is a large component with many children.
 // For this to be effective, props passed from the parent (App.tsx), especially
 // functions like `onChangeView` and `onUpdateProfile`, must be memoized with `useCallback`.
-const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, latestGrowth, vaccines, recentEntries, customEvents, onChangeView, onUpdateProfile, themeColor, appData, onRestoreData }) => {
+const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, latestGrowth, vaccines, recentEntries, customEvents, onChangeView, onUpdateProfile, themeColor }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [showSecurity, setShowSecurity] = useState(false);
   const [showGraduation, setShowGraduation] = useState(false);
@@ -588,12 +584,6 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
                 <Save size={16} />
                 Kaydet
               </button>
-
-              <DataManagement
-                themeColor={themeColor}
-                appData={appData}
-                onRestore={onRestoreData}
-              />
             </div>
           </div>
         )}

@@ -186,29 +186,6 @@ const App: React.FC = () => {
     setDocuments(prev => prev.filter(d => d.id !== id));
   }, []);
 
-  const handleRestoreData = useCallback(async (data: AppData) => {
-    try {
-      await storageService.saveData(data);
-      // A full page reload is the simplest way to ensure all state is updated from storage.
-      window.location.reload();
-    } catch (error) {
-      console.error("Failed to restore data:", error);
-      alert("Veriler geri yüklenirken bir hata oluştu.");
-    }
-  }, []);
-
-  // Group all app data into a single object for easier backup/export.
-  const appData: AppData = useMemo(() => ({
-    profile,
-    entries,
-    growthRecords,
-    vaccines,
-    milestones,
-    customEvents,
-    medicalHistory,
-    documents
-  }), [profile, entries, growthRecords, vaccines, milestones, customEvents, medicalHistory, documents]);
-
   // ⚡ Performance Optimization: Memoize latestGrowth to prevent re-sorting on every render.
   // This is crucial because App.tsx is a high-frequency re-rendering component.
   const latestGrowth = useMemo(() => {
