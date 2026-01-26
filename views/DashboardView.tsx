@@ -80,7 +80,12 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
     return { chronoString, correctedString };
   };
 
-  const ageData = calculateAge(profile.birthDate, profile.isPremature, profile.gestationalWeeks);
+  // ⚡ Performance Optimization:
+  // Memoize the age calculation to prevent it from running on every render.
+  // The age only needs to be recalculated when the profile data changes.
+  const ageData = useMemo(() => {
+    return calculateAge(profile.birthDate, profile.isPremature, profile.gestationalWeeks);
+  }, [profile.birthDate, profile.isPremature, profile.gestationalWeeks]);
 
   // Check for 5-Year Graduation (60 Months)
   useEffect(() => {
