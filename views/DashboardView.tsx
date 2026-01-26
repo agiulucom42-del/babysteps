@@ -450,7 +450,7 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
           <div className="relative z-10 animate-fade-in max-h-[80vh] overflow-y-auto no-scrollbar pb-10">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-white">Profili Düzenle</h3>
-              <button onClick={() => setIsEditing(false)} className="bg-white/20 p-1.5 rounded-full hover:bg-white/30">
+              <button onClick={() => setIsEditing(false)} className="bg-white/20 p-1.5 rounded-full hover:bg-white/30" aria-label="Düzenlemeyi İptal Et">
                 <X size={16} />
               </button>
             </div>
@@ -471,6 +471,7 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
                    <button 
                      onClick={() => fileInputRef.current?.click()}
                      className={`absolute bottom-0 right-0 bg-white text-${themeColor}-500 p-2 rounded-full shadow-lg hover:bg-${themeColor}-50 transition-colors z-10`}
+                     aria-label="Fotoğraf Yükle"
                    >
                      <Camera size={16} />
                    </button>
@@ -481,6 +482,7 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
                        onClick={handleRemovePhoto}
                        className="absolute -top-1 -right-1 bg-red-500 text-white p-1.5 rounded-full shadow-lg hover:bg-red-600 transition-colors z-10"
                        title="Fotoğrafı Kaldır"
+                       aria-label="Fotoğrafı Kaldır"
                      >
                        <Trash2 size={12} />
                      </button>
