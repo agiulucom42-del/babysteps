@@ -1,15 +1,27 @@
 
-import { GoogleGenAI, Content } from "@google/genai";
+import type { GoogleGenAI, Content } from "@google/genai";
 import { BabyProfile, ChatMessage } from "../types";
 
-const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
-if (!apiKey) {
-  console.error("GEMINI_API_KEY is not set.");
-}
-const ai = new GoogleGenAI({ apiKey: apiKey });
+// ⚡ Performance Optimization: Dynamically import the Google AI SDK.
+// The static import `import { GoogleGenAI } from "@google/genai"` causes the
+// application to hang on startup if the GEMINI_API_KEY is missing or invalid.
+// By moving the import inside the function that uses it, we ensure the SDK is
+// only loaded when a user actually interacts with the AI assistant, preventing
+// the entire app from failing to start. This improves initial load performance
+// and resilience.
+// We also use `import type` for the types to ensure they are available at
+// compile time without triggering a runtime import.
 
 export const askParentingAdvisor = async (history: ChatMessage[], profile: BabyProfile): Promise<string> => {
+  const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+  if (!apiKey) {
+    console.error("GEMINI_API_KEY is not set.");
+    throw new Error('GEMINI_API_KEY is not set.');
+  }
+
   try {
+    const { GoogleGenAI } = await import('@google/genai');
+    const ai = new GoogleGenAI({ apiKey });
     // Yaş hesaplama
     const birthDate = new Date(profile.birthDate);
     const now = new Date();
