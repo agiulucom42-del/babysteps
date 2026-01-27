@@ -304,6 +304,7 @@ const App: React.FC = () => {
           confirmText="Evet, Sıfırla"
           cancelText="İptal"
           themeColor={themeColor}
+          isDestructive={true}
         />
       </div>
     </div>
