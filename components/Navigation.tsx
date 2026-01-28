@@ -9,7 +9,7 @@ interface NavigationProps {
   themeColor: string;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ currentView, setView, themeColor }) => {
+const Navigation: React.FC<NavigationProps> = React.memo(({ currentView, setView, themeColor }) => {
   const navItems = [
     { id: 'dashboard', icon: Home, label: 'Özet' },
     { id: 'diary', icon: Book, label: 'Günlük' },
@@ -40,6 +40,6 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, themeColo
       </div>
     </div>
   );
-};
+});
 
 export default Navigation;
