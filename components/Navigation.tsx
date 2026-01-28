@@ -28,6 +28,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, themeColo
             <button
               key={item.id}
               onClick={() => setView(item.id as ViewState)}
+              aria-current={isActive ? 'page' : undefined}
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200 ${
                 isActive ? `text-${themeColor}-500` : `text-slate-400 hover:text-${themeColor}-300`
               }`}
