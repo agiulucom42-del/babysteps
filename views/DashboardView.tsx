@@ -655,7 +655,7 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
                <button onClick={() => onChangeView('diary')} className={`mt-2 text-${themeColor}-500 text-xs font-bold`}>İlk anıyı ekle</button>
              </div>
           ) : (
-            recentEntries.slice(0, 3).map(entry => (
+            recentEntries.map(entry => (
               <div key={entry.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex space-x-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => onChangeView('diary')}>
                 {entry.mediaUrl && (
                   <div className="w-20 h-20 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0 shadow-inner">

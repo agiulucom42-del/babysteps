@@ -194,6 +194,12 @@ const App: React.FC = () => {
     return [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   }, [growthRecords]);
 
+  // ⚡ Performance Optimization: Memoize recent entries to prevent DashboardView re-renders.
+  // By slicing the array and using a dependency key derived from the top 3 entry IDs,
+  // the `recentEntries` prop reference remains stable unless those specific entries change,
+  // preventing costly re-renders of the dashboard.
+  const recentEntries = useMemo(() => entries.slice(0, 3), [entries[0]?.id, entries[1]?.id, entries[2]?.id]);
+
   // --- Render Logic ---
   if (!isLoaded) {
     return (
@@ -228,7 +234,7 @@ const App: React.FC = () => {
             profile={profile}
             latestGrowth={latestGrowth}
             vaccines={vaccines}
-            recentEntries={entries}
+            recentEntries={recentEntries}
             customEvents={customEvents}
             onChangeView={handleSetCurrentView}
             onUpdateProfile={handleUpdateProfile}
