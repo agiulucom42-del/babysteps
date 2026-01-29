@@ -186,12 +186,16 @@ const App: React.FC = () => {
     setDocuments(prev => prev.filter(d => d.id !== id));
   }, []);
 
-  // ⚡ Performance Optimization: Memoize latestGrowth to prevent re-sorting on every render.
-  // This is crucial because App.tsx is a high-frequency re-rendering component.
+  // ⚡ Performance Optimization: Memoize latestGrowth with an O(n) reduce operation.
+  // Previously, this used `sort()` which is O(n log n). By using `reduce()`,
+  // we find the latest record in a single pass, which is more efficient for
+  // large datasets, preventing a costly re-sort on every render of this
+  // high-frequency component.
   const latestGrowth = useMemo(() => {
     if (growthRecords.length === 0) return undefined;
-    // Create a shallow copy before sorting to avoid mutating the original state array.
-    return [...growthRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    return growthRecords.reduce((latest, current) => {
+      return new Date(current.date) > new Date(latest.date) ? current : latest;
+    });
   }, [growthRecords]);
 
   // ⚡ Performance Optimization: Memoize recent entries to prevent DashboardView re-renders.
