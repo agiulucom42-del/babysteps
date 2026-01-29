@@ -375,6 +375,7 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
                  <button 
                   onClick={() => setShowSecurity(true)}
                   className="bg-white/20 p-2 rounded-xl hover:bg-white/30 transition-colors backdrop-blur-sm"
+                  aria-label="Güvenlik Bilgileri"
                 >
                   <ShieldCheck size={18} className="text-white" />
                 </button>
@@ -383,6 +384,7 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
                 <button 
                   onClick={() => setShowNotifications(!showNotifications)}
                   className="bg-white/20 p-2 rounded-xl hover:bg-white/30 transition-colors backdrop-blur-sm relative"
+                  aria-label="Bildirimler"
                 >
                   <Bell size={18} className="text-white" />
                   {notifications.length > 0 && (
@@ -393,6 +395,7 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
                 <button 
                   onClick={() => { setEditForm(profile); setIsEditing(true); }}
                   className="bg-white/20 p-2 rounded-xl hover:bg-white/30 transition-colors backdrop-blur-sm"
+                  aria-label="Profili Düzenle"
                 >
                   <Settings size={18} className="text-white" />
                 </button>
