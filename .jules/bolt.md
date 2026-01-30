@@ -1,0 +1,3 @@
+## 2026-01-30 - [Derived Data Memoization in GrowthView]
+**Learning:** In applications with a central state manager like `App.tsx`, cascading re-renders are common. View components that perform expensive data transformations (e.g., O(n log n) sorting and complex O(n*m) mapping logic for charts) on every render become significant bottlenecks as the dataset grows. Moving static derived calculations (like mapping `WHO_STANDARDS` keys) out of inner loops and wrapping the entire transformation in `useMemo` significantly reduces pressure on the main thread.
+**Action:** Always audit `map` loops for static or expensive operations that can be moved outside the loop or memoized at the component level.
