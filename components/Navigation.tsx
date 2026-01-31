@@ -28,12 +28,17 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, themeColo
             <button
               key={item.id}
               onClick={() => setView(item.id as ViewState)}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200 ${
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-${themeColor}-400 focus-visible:ring-inset rounded-xl ${
                 isActive ? `text-${themeColor}-500` : `text-slate-400 hover:text-${themeColor}-300`
               }`}
             >
               <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
               <span className="text-[10px] font-medium">{item.label}</span>
+              {isActive && (
+                <span className={`absolute -bottom-1 w-1 h-1 rounded-full bg-${themeColor}-500 animate-fade-in`} />
+              )}
             </button>
           );
         })}
