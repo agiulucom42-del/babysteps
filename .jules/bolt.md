@@ -1,0 +1,3 @@
+## 2026-02-02 - [GrowthView Performance & In-place Mutation]
+**Learning:** Found that `GrowthView.tsx` was performing an in-place `.sort()` on the `milestones` prop during render. This not only causes redundant calculations but also violates React's immutability principles as it mutates the source data. Additionally, extracting object keys from a static constant (`WHO_STANDARDS`) inside a loop for every record was a significant O(N*M) bottleneck.
+**Action:** Use `useMemo` with the spread operator `[...array].sort()` for stable, non-mutating derived data. Move static key extractions and sorting outside the component or into memoized constants to achieve O(1) or O(M) lookup preparation instead of repeating it in a loop.
