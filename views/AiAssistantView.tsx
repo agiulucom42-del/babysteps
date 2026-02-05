@@ -93,6 +93,7 @@ const AiAssistantView: React.FC<AiAssistantViewProps> = ({ profile, themeColor }
           onClick={handleClearChat}
           className={`p-2 text-slate-300 hover:text-${themeColor}-500 hover:bg-${themeColor}-50 rounded-full transition-colors`}
           title="Sohbeti Temizle"
+          aria-label="Sohbeti Temizle"
         >
           <Trash2 size={18} />
         </button>
@@ -170,6 +171,7 @@ const AiAssistantView: React.FC<AiAssistantViewProps> = ({ profile, themeColor }
           onClick={() => handleSend()}
           disabled={!inputText.trim() || isLoading}
           className={`absolute right-2 top-1/2 -translate-y-1/2 bg-${themeColor}-500 text-white p-2 rounded-xl disabled:bg-slate-200 disabled:cursor-not-allowed transition-all hover:bg-${themeColor}-600 active:scale-95 shadow-md`}
+          aria-label={isLoading ? "Gönderiliyor" : "Gönder"}
         >
           {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
         </button>
