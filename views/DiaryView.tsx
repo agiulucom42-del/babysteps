@@ -585,7 +585,11 @@ const DiaryView: React.FC<DiaryViewProps> = ({ entries, onAddEntry, onDeleteEntr
                            <Share2 size={14} />
                          </button>
                          <button 
-                           onClick={() => onDeleteEntry(entry.id)} 
+                           onClick={() => {
+                               if (window.confirm("Bu anıyı silmek istediğinizden emin misiniz?")) {
+                                   onDeleteEntry(entry.id);
+                               }
+                           }}
                            className="text-slate-300 hover:text-red-400 transition-colors p-1"
                          >
                            <X size={14} />
@@ -1029,7 +1033,14 @@ const DiaryView: React.FC<DiaryViewProps> = ({ entries, onAddEntry, onDeleteEntr
                             </div>
                          </div>
                       </div>
-                      <button onClick={() => onDeleteEntry(entry.id)} className="text-slate-300 hover:text-red-400 p-2">
+                      <button
+                        onClick={() => {
+                          if (window.confirm("Bu kaydı silmek istediğinizden emin misiniz?")) {
+                            onDeleteEntry(entry.id);
+                          }
+                        }}
+                        className="text-slate-300 hover:text-red-400 p-2"
+                      >
                         <X size={14} />
                       </button>
                    </div>
