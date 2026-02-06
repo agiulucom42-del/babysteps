@@ -65,8 +65,13 @@ const decrypt = (encryptedText: string, key: string): string => {
 
 const openDB = (): Promise<IDBDatabase> => {
   return new Promise((resolve, reject) => {
-    // Check if indexedDB is supported
+    // Timeout defense for headless environments
+    const timeout = setTimeout(() => {
+      reject(new Error("IndexedDB opening timed out"));
+    }, 5000);
+
     if (!('indexedDB' in window)) {
+        clearTimeout(timeout);
         reject(new Error("IndexedDB not supported"));
         return;
     }
@@ -80,8 +85,14 @@ const openDB = (): Promise<IDBDatabase> => {
       }
     };
 
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      clearTimeout(timeout);
+      resolve(request.result);
+    };
+    request.onerror = () => {
+      clearTimeout(timeout);
+      reject(request.error);
+    };
   });
 };
 
