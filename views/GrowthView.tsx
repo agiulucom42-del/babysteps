@@ -1,9 +1,22 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { GrowthRecord, Milestone, BabyProfile, ThemeProps } from '../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Plus, Ruler, CheckCircle2, Circle, Trophy, Activity } from 'lucide-react';
 import { WHO_STANDARDS } from '../constants';
+
+// ⚡ Performance Optimization: Static WHO month keys extracted to module level
+// to avoid redundant Object.keys().map().sort() operations on every render.
+const AVAILABLE_WHO_MONTHS = Object.keys(WHO_STANDARDS).map(Number).sort((a, b) => a - b);
+
+// ⚡ Performance Optimization: Extracted pure helper function outside the component
+// to prevent it from being re-created on every render cycle.
+const getMonthsBetween = (d1: Date, d2: Date) => {
+  let months = (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
+  // Adjust for partial months (simple approximation)
+  if (d2.getDate() < d1.getDate()) months--;
+  return Math.max(0, months);
+};
 
 interface GrowthViewProps extends ThemeProps {
   profile: BabyProfile;
@@ -14,7 +27,10 @@ interface GrowthViewProps extends ThemeProps {
   onAddMilestone: (milestone: Milestone) => void;
 }
 
-const GrowthView: React.FC<GrowthViewProps> = ({ profile, records, milestones, onAddRecord, onToggleMilestone, onAddMilestone, themeColor }) => {
+// ⚡ Performance Optimization: Wrapped component in React.memo to prevent unnecessary re-renders.
+// Since App.tsx holds the central state, any change there would normally trigger a full re-render
+// of GrowthView even if none of its props changed.
+const GrowthView: React.FC<GrowthViewProps> = React.memo(({ profile, records, milestones, onAddRecord, onToggleMilestone, onAddMilestone, themeColor }) => {
   const [activeTab, setActiveTab] = useState<'charts' | 'milestones'>('charts');
   
   // Chart Logic State
@@ -31,47 +47,42 @@ const GrowthView: React.FC<GrowthViewProps> = ({ profile, records, milestones, o
   const [mMonth, setMMonth] = useState('');
   const [mCategory, setMCategory] = useState<Milestone['category']>('motor');
 
-  // Prepare data with WHO references
-  const getMonthsBetween = (d1: Date, d2: Date) => {
-      let months = (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
-      // Adjust for partial months (simple approximation)
-      if (d2.getDate() < d1.getDate()) months--;
-      return Math.max(0, months);
-  };
+  // ⚡ Performance Optimization: Memoized chartData calculation.
+  // This avoids re-sorting the records and re-calculating WHO standard mappings on every render.
+  // We also moved birthDate creation and availableMonths lookup outside the map loop.
+  const chartData = useMemo(() => {
+    const birthDateObj = new Date(profile.birthDate);
 
-  const chartData = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .map(r => {
-       const date = new Date(r.date);
-       const birthDate = new Date(profile.birthDate);
-       const ageInMonths = getMonthsBetween(birthDate, date);
-       
-       // Find closest WHO standard
-       // WHO_STANDARDS keys are 0, 1, 2, ...
-       // If exact month missing, fallback to closest lower or 0
-       let lookupMonth = ageInMonths;
-       const availableMonths = Object.keys(WHO_STANDARDS).map(Number).sort((a,b) => a-b);
-       
-       if (!WHO_STANDARDS[lookupMonth]) {
-          // Find closest available month key that is less than or equal to current age
-          const closest = availableMonths.filter(m => m <= ageInMonths).pop();
-          lookupMonth = closest !== undefined ? closest : 0;
-       }
+    return [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map(r => {
+         const date = new Date(r.date);
+         const ageInMonths = getMonthsBetween(birthDateObj, date);
 
-       const standards = WHO_STANDARDS[lookupMonth]?.[profile.gender] || WHO_STANDARDS[0][profile.gender];
-       
-       return {
-          ...r,
-          formattedDate: date.toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' }),
-          // Weight Percentiles (P3, P50, P97)
-          w3: standards.w[0],
-          w50: standards.w[1],
-          w97: standards.w[2],
-          // Height Percentiles
-          h3: standards.h[0],
-          h50: standards.h[1],
-          h97: standards.h[2],
-       };
-    });
+         // Find closest WHO standard
+         let lookupMonth = ageInMonths;
+
+         if (!WHO_STANDARDS[lookupMonth]) {
+            // Find closest available month key that is less than or equal to current age
+            const closest = AVAILABLE_WHO_MONTHS.filter(m => m <= ageInMonths).pop();
+            lookupMonth = closest !== undefined ? closest : 0;
+         }
+
+         const standards = WHO_STANDARDS[lookupMonth]?.[profile.gender] || WHO_STANDARDS[0][profile.gender];
+
+         return {
+            ...r,
+            formattedDate: date.toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' }),
+            // Weight Percentiles (P3, P50, P97)
+            w3: standards.w[0],
+            w50: standards.w[1],
+            w97: standards.w[2],
+            // Height Percentiles
+            h3: standards.h[0],
+            h50: standards.h[1],
+            h97: standards.h[2],
+         };
+      });
+  }, [records, profile.birthDate, profile.gender]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,9 +118,20 @@ const GrowthView: React.FC<GrowthViewProps> = ({ profile, records, milestones, o
     setShowMilestoneForm(false);
   };
 
-  // Milestones grouping
-  const completedCount = milestones.filter(m => m.isCompleted).length;
-  const progressPercentage = Math.round((completedCount / milestones.length) * 100);
+  // ⚡ Performance Optimization: Memoized milestones statistics.
+  const { completedCount, progressPercentage } = useMemo(() => {
+    const completed = milestones.filter(m => m.isCompleted).length;
+    const progress = milestones.length > 0 ? Math.round((completed / milestones.length) * 100) : 0;
+    return { completedCount: completed, progressPercentage: progress };
+  }, [milestones]);
+
+  // ⚡ Performance Optimization & Bug Fix:
+  // Memoized sorted milestones. This fixes a bug where `milestones.sort()` in the JSX
+  // was mutating the original prop in-place, while also ensuring a stable array
+  // reference for rendering.
+  const sortedMilestones = useMemo(() => {
+    return [...milestones].sort((a, b) => a.expectedMonth - b.expectedMonth);
+  }, [milestones]);
 
   return (
     <div className="pb-24 space-y-6">
@@ -351,7 +373,7 @@ const GrowthView: React.FC<GrowthViewProps> = ({ profile, records, milestones, o
 
           {/* Timeline List */}
           <div className="space-y-4">
-             {milestones.sort((a,b) => a.expectedMonth - b.expectedMonth).map((milestone) => (
+             {sortedMilestones.map((milestone) => (
                 <div 
                   key={milestone.id} 
                   onClick={() => onToggleMilestone(milestone.id)}
@@ -394,6 +416,6 @@ const GrowthView: React.FC<GrowthViewProps> = ({ profile, records, milestones, o
       </div>
     </div>
   );
-};
+});
 
 export default GrowthView;

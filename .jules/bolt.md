@@ -1,0 +1,3 @@
+## 2026-02-03 - [Optimizing GrowthView Render Performance]
+**Learning:** Found a critical performance anti-pattern in `GrowthView.tsx` where `Object.keys(WHO_STANDARDS).map().sort()` was being executed inside a `records.map` loop on every render. Additionally, detected a prop mutation bug where `milestones.sort()` was called directly in the JSX, mutating the parent's state in-place.
+**Action:** Extract static derived data (like WHO month keys) to module level constants. Wrap complex view components in `React.memo` and use `useMemo` for expensive data transformations to prevent cascading re-renders from central state in `App.tsx`. Always clone arrays before sorting in render if they come from props/state.
