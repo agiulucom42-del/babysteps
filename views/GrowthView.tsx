@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { GrowthRecord, Milestone, BabyProfile, ThemeProps } from '../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Plus, Ruler, CheckCircle2, Circle, Trophy, Activity } from 'lucide-react';
@@ -14,7 +14,18 @@ interface GrowthViewProps extends ThemeProps {
   onAddMilestone: (milestone: Milestone) => void;
 }
 
-const GrowthView: React.FC<GrowthViewProps> = ({ profile, records, milestones, onAddRecord, onToggleMilestone, onAddMilestone, themeColor }) => {
+// Helper to calculate months between two dates
+const getMonthsBetween = (d1: Date, d2: Date) => {
+    let months = (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
+    // Adjust for partial months (simple approximation)
+    if (d2.getDate() < d1.getDate()) months--;
+    return Math.max(0, months);
+};
+
+// ⚡ Performance Optimization:
+// Wrapped GrowthView with React.memo to prevent unnecessary re-renders.
+// This is important because the component is part of a larger app with centralized state.
+const GrowthView: React.FC<GrowthViewProps> = React.memo(({ profile, records, milestones, onAddRecord, onToggleMilestone, onAddMilestone, themeColor }) => {
   const [activeTab, setActiveTab] = useState<'charts' | 'milestones'>('charts');
   
   // Chart Logic State
@@ -31,47 +42,45 @@ const GrowthView: React.FC<GrowthViewProps> = ({ profile, records, milestones, o
   const [mMonth, setMMonth] = useState('');
   const [mCategory, setMCategory] = useState<Milestone['category']>('motor');
 
-  // Prepare data with WHO references
-  const getMonthsBetween = (d1: Date, d2: Date) => {
-      let months = (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
-      // Adjust for partial months (simple approximation)
-      if (d2.getDate() < d1.getDate()) months--;
-      return Math.max(0, months);
-  };
+  // ⚡ Performance Optimization:
+  // Memoize the availableMonths and chartData to prevent redundant calculations on every render.
+  // This is crucial as GrowthView can re-render when switching tabs or adding records.
+  const availableMonths = useMemo(() => Object.keys(WHO_STANDARDS).map(Number).sort((a,b) => a-b), []);
 
-  const chartData = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .map(r => {
-       const date = new Date(r.date);
-       const birthDate = new Date(profile.birthDate);
-       const ageInMonths = getMonthsBetween(birthDate, date);
-       
-       // Find closest WHO standard
-       // WHO_STANDARDS keys are 0, 1, 2, ...
-       // If exact month missing, fallback to closest lower or 0
-       let lookupMonth = ageInMonths;
-       const availableMonths = Object.keys(WHO_STANDARDS).map(Number).sort((a,b) => a-b);
-       
-       if (!WHO_STANDARDS[lookupMonth]) {
-          // Find closest available month key that is less than or equal to current age
-          const closest = availableMonths.filter(m => m <= ageInMonths).pop();
-          lookupMonth = closest !== undefined ? closest : 0;
-       }
+  const chartData = useMemo(() => {
+    return [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map(r => {
+         const date = new Date(r.date);
+         const birthDate = new Date(profile.birthDate);
+         const ageInMonths = getMonthsBetween(birthDate, date);
 
-       const standards = WHO_STANDARDS[lookupMonth]?.[profile.gender] || WHO_STANDARDS[0][profile.gender];
-       
-       return {
-          ...r,
-          formattedDate: date.toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' }),
-          // Weight Percentiles (P3, P50, P97)
-          w3: standards.w[0],
-          w50: standards.w[1],
-          w97: standards.w[2],
-          // Height Percentiles
-          h3: standards.h[0],
-          h50: standards.h[1],
-          h97: standards.h[2],
-       };
-    });
+         // Find closest WHO standard
+         // WHO_STANDARDS keys are 0, 1, 2, ...
+         // If exact month missing, fallback to closest lower or 0
+         let lookupMonth = ageInMonths;
+
+         if (!WHO_STANDARDS[lookupMonth]) {
+            // Find closest available month key that is less than or equal to current age
+            const closest = availableMonths.filter(m => m <= ageInMonths).pop();
+            lookupMonth = closest !== undefined ? closest : 0;
+         }
+
+         const standards = WHO_STANDARDS[lookupMonth]?.[profile.gender] || WHO_STANDARDS[0][profile.gender];
+
+         return {
+            ...r,
+            formattedDate: date.toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' }),
+            // Weight Percentiles (P3, P50, P97)
+            w3: standards.w[0],
+            w50: standards.w[1],
+            w97: standards.w[2],
+            // Height Percentiles
+            h3: standards.h[0],
+            h50: standards.h[1],
+            h97: standards.h[2],
+         };
+      });
+  }, [records, profile.birthDate, profile.gender, availableMonths]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -394,6 +403,6 @@ const GrowthView: React.FC<GrowthViewProps> = ({ profile, records, milestones, o
       </div>
     </div>
   );
-};
+});
 
 export default GrowthView;
