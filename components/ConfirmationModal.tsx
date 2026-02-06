@@ -11,6 +11,7 @@ interface ConfirmationModalProps {
   confirmText?: string;
   cancelText?: string;
   themeColor?: string;
+  isDestructive?: boolean;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -22,6 +23,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   themeColor = 'rose',
+  isDestructive = false,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
@@ -84,7 +86,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     },
   };
 
-  const styles = themeStyles[themeColor as keyof typeof themeStyles] || themeStyles.rose;
+  const effectiveTheme = isDestructive ? 'rose' : themeColor;
+  const styles = themeStyles[effectiveTheme as keyof typeof themeStyles] || themeStyles.rose;
 
 
   return (
@@ -122,7 +125,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <button
             ref={confirmButtonRef}
             type="button"
-            className={`inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${styles.bg} ${styles.hoverBg} ${styles.ring} ${themeColor === 'rose' ? 'animate-pulse' : ''}`}
+            className={`inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${styles.bg} ${styles.hoverBg} ${styles.ring} ${effectiveTheme === 'rose' ? 'animate-pulse' : ''}`}
             onClick={onConfirm}
           >
             {confirmText}
