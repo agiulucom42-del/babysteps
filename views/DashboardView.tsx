@@ -281,7 +281,12 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
       {showSecurity && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
             <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative border border-white/50">
-                <button onClick={() => setShowSecurity(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-full p-1">
+                <button
+                  onClick={() => setShowSecurity(false)}
+                  aria-label="Kapat"
+                  title="Kapat"
+                  className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-full p-1 active:scale-90 transition-transform"
+                >
                     <X size={20} />
                 </button>
                 
@@ -374,7 +379,9 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
                  {/* Security Info Button */}
                  <button 
                   onClick={() => setShowSecurity(true)}
-                  className="bg-white/20 p-2 rounded-xl hover:bg-white/30 transition-colors backdrop-blur-sm"
+                  aria-label="Güvenlik Bilgisi"
+                  title="Güvenlik Bilgisi"
+                  className="bg-white/20 p-2 rounded-xl hover:bg-white/30 transition-all backdrop-blur-sm active:scale-95"
                 >
                   <ShieldCheck size={18} className="text-white" />
                 </button>
@@ -382,7 +389,9 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
                  {/* Notification Button */}
                 <button 
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="bg-white/20 p-2 rounded-xl hover:bg-white/30 transition-colors backdrop-blur-sm relative"
+                  aria-label="Bildirimler"
+                  title="Bildirimler"
+                  className="bg-white/20 p-2 rounded-xl hover:bg-white/30 transition-all backdrop-blur-sm relative active:scale-95"
                 >
                   <Bell size={18} className="text-white" />
                   {notifications.length > 0 && (
@@ -392,7 +401,9 @@ const DashboardView: React.FC<DashboardViewProps> = React.memo(({ profile, lates
 
                 <button 
                   onClick={() => { setEditForm(profile); setIsEditing(true); }}
-                  className="bg-white/20 p-2 rounded-xl hover:bg-white/30 transition-colors backdrop-blur-sm"
+                  aria-label="Ayarlar"
+                  title="Ayarlar"
+                  className="bg-white/20 p-2 rounded-xl hover:bg-white/30 transition-all backdrop-blur-sm active:scale-95"
                 >
                   <Settings size={18} className="text-white" />
                 </button>
