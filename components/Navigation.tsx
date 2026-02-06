@@ -27,13 +27,19 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, themeColo
           return (
             <button
               key={item.id}
+              type="button"
               onClick={() => setView(item.id as ViewState)}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200 ${
+              aria-current={isActive ? 'page' : undefined}
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-${themeColor}-400 rounded-lg ${
                 isActive ? `text-${themeColor}-500` : `text-slate-400 hover:text-${themeColor}-300`
               }`}
             >
-              <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110 group-active:scale-95'}`}>
+                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+              </div>
+              <span className={`text-[10px] font-medium transition-transform duration-200 ${isActive ? 'scale-105' : ''}`}>
+                {item.label}
+              </span>
             </button>
           );
         })}
